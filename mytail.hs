@@ -6,16 +6,14 @@
  -}
 
 import Control.Applicative ((<$>))
+import Data.Monoid (mappend)
 import Control.Monad (when)
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
---import Data.Conduit ( ($$), ($=) )
---import qualified Data.Conduit as C
 import Data.Conduit
 import System.Environment (getArgs)
 import qualified System.IO as SI
-import Data.Monoid
 
 type FileSize = Integer
 
@@ -40,21 +38,19 @@ reverseFile fp = sourceIO initialize close pull
             SI.hSeek h SI.SeekFromEnd (-1)
             return $ Just (h, s)
           else return Nothing
-    close st
-        | Nothing    <- st = return ()
-        | Just (h,_) <- st = SI.hClose h
-    pull st
-        | Nothing    <- st = return IOClosed
-        | Just (h,l) <- st = do
-            pos <- liftIO $ SI.hTell h
-            if pos == 0
-              then return IOClosed
-              else do
-                let len = min pos l
-                liftIO $ SI.hSeek h SI.RelativeSeek (-len)
-                x <- liftIO $ BS.hGetSome h $ fromIntegral len
-                liftIO $ SI.hSeek h SI.RelativeSeek (-len)
-                return $ IOOpen x
+    close st@Nothing       = return ()
+    close st@(Just (h, _)) = SI.hClose h
+    pull  st@Nothing       = return IOClosed
+    pull  st@(Just (h, l)) = do
+        pos <- liftIO $ SI.hTell h
+        if pos == 0
+          then return IOClosed
+          else do
+            let len = min pos l
+            liftIO $ SI.hSeek h SI.RelativeSeek (-len)
+            x <- liftIO $ BS.hGetSome h $ fromIntegral len
+            liftIO $ SI.hSeek h SI.RelativeSeek (-len)
+            return $ IOOpen x
 
 stackSink :: Monad m => Sink BS.ByteString m BS.ByteString
 stackSink = sinkState BS.empty push close
@@ -66,13 +62,12 @@ limitLinesReverse :: Monad m => Int -> Conduit BS.ByteString m BS.ByteString
 limitLinesReverse count = conduitState count push close
   where
     close _ = return []
-    push n i
-        | n == 0    = return (StateFinished (Just i) [])
-        | otherwise =  do
-            let (n',bs) = loop n i
-            if n' == 0
-                then return (StateFinished Nothing [bs])
-                else return (StateProducing n' [bs])
+    push 0 i = return (StateFinished (Just i) [])
+    push n i = do
+        let (n',bs) = loop n i
+        if n' == 0
+            then return (StateFinished Nothing [bs])
+            else return (StateProducing n' [bs])
     loop n x
         | c <= n = (n - c, x)
         | c > n  = (0, BC.drop (pos - 1) x)
