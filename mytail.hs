@@ -79,4 +79,4 @@ main :: IO ()
 main = do
     [fp, n] <- getArgs
     x <- runResourceT $ reverseFile fp $= limitLinesReverse (read n) $$ stackSink
-    BC.putStrLn $ BC.drop 1 x
+    BC.putStrLn $ BC.drop 2 x
