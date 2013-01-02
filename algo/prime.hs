@@ -1,12 +1,11 @@
 import System.Environment (getArgs)
 
 prime :: [Int]
-prime = help [2..]
-  where
-    help ys = let y = head ys in y : help (sieve y ys)
+prime = sieve [2..]
 
-sieve :: Int -> [Int] -> [Int]
-sieve n xs = filter (\m -> m `mod` n /= 0) xs
+sieve :: [Int] -> [Int]
+sieve (x:xs) = x : sieve (filter (\m -> m `mod` x /= 0) xs)
+--sieve (x:xs) = x : sieve [y | y <- xs, y `mod` x /= 0]
 
 main :: IO ()
 main = do
