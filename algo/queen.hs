@@ -1,3 +1,19 @@
+import Control.Applicative
+import System.Environment (getArgs)
+
+main :: IO ()
+main = do
+    n <- read <$> (head <$> getArgs)
+    let ps = queenMain n
+    print ps
+
+queenMain :: Int -> [Pos]
+queenMain n | n < 4 = error "n must be more than 3"
+            | otherwise = queen (n, n) n []
+
+qallMain :: Int -> [[Pos]]
+qallMain n = qall (n, n) n []
+
 type Pos = (Int, Int)
 
 isOutOfQueen :: Pos -> Pos -> Bool
@@ -37,13 +53,6 @@ queen p@(x,y) n qs | canPut p qs = let qnext = queen (n, y - 1) n (p : qs) in if
 --                               else (pos: queens)
 --                         | x > 1 = queen (x - 1, y) n queens
 --                         | x == 1 = []
-
-queenMain :: Int -> [Pos]
-queenMain n | n < 4 = error "n must be more than 3"
-            | otherwise = queen (n, n) n []
-
-qallMain :: Int -> [[Pos]]
-qallMain n = qall (n, n) n []
 
 test1 = canPut (1,1) [(2,3), (3,2)]
 test2 = canPut (1,1) [(2,3), (1,5)]

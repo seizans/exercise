@@ -1,28 +1,36 @@
+import Control.Applicative
+import System.Environment (getArgs)
+
 type Pos = (Int, Int)
 
-data Cell = Free
-          | Reached
-          | Queen
-          deriving Show
+nqueen :: Int -> [[Pos]]
+nqueen n
+    | n < 3     = error "n should be lte 4"
+    | otherwise = concat [nqueen' n (i,n) [] | i <- [1..n] ]
 
-type Board = [[Cell]]
+nqueen' :: Int -> Pos -> [Pos] -> [[Pos]]
+nqueen' n (x,1) ps
+    | canPut (x,1) ps = [(x,1) : ps]
+    | otherwise = []
+nqueen' n (x,y) ps = if canPut (x,y) ps
+    then concat [nqueen' n (i,(y-1)) ((x,y):ps) | i <- [1..n] ]
+    else []
 
-newBoard :: Int -> Board
-newBoard n | n < 4 = error "n must be more than 3"
-           | otherwise = [xs | xs <- [newRow n | _ <- [1..n] ] ]
-  where
-    newRow n = [Free | _ <- [1..n] ]
+canPut :: Pos -> [Pos] -> Bool
+canPut q [] = True
+canPut q (p:ps) = if inArea p q then False else canPut q ps
 
-putQueen :: Pos -> Board -> Board
-putQueen (x,y) board | cell (x,y) board == Free = putQueen' (x,y) board
-                     | otherwise = error "cannot put Queen there"
-  where
-    cell (x',y') board' = board' !! y' !! x'
-    putQueen' (x,y) (bs:bss) = 
+inArea :: Pos -> Pos -> Bool
+inArea (a,b) (x,y)
+    | a == x    = True
+    | b == y    = True
+    | y-b == x-a = True
+    | y-b == -x+a = True
+    | otherwise = False
 
-nqueenMain :: Int -> [Pos]
-nqueenMain n | n < 4 = error "n must be more than 3"
-             | otherwise = nqueen n n
-
-nqueen :: Int -> Int -> [Pos]
-nqueen 1 1 = [(1,1)]
+main :: IO ()
+main = do
+    n <- read <$> (head <$> getArgs)
+    let ps = nqueen n
+    mapM_ print ps
+    print $ length ps
