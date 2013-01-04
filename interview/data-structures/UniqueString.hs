@@ -6,7 +6,7 @@ main = do
     str <- head <$> getArgs
     print $ isAllUnique str
 
-isAllUnique :: String -> Bool
+isAllUnique :: Eq a => [a] -> Bool
 isAllUnique [] = True
 isAllUnique (c:cs) = if c `elem` cs then False else isAllUnique cs
 
