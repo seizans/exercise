@@ -78,7 +78,7 @@ size コマンドで確認できる。
 
 :text: 実行コード、const変数、文字列リテラル
 :data: 書き込み可能な変数
-:bss(Block Started by Symbol): 初期値が未定義の変数
+:bss: (Block Started by Symbol)初期値が未定義の変数
 
 ELF形式では、より多くの領域に分割している。
 分割された領域の単位をセクションと呼ぶ。
