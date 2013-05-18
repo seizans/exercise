@@ -84,14 +84,16 @@ ELF形式では、より多くの領域に分割している。
 objdump -h コマンドで、実行形式のセクションを確認できる。
 
 
-VMA(Virtual Memory Address) と LMA(Load Memory Address) の違いわかりません・・・
+VMA(Virtual Memory Address) と LMA(Load Memory Address) 
 
 ローダの仕事
 ============
 
 - OSがローダの役割を持つ。
 - execve() システム・コールが呼ばれるとOSが実行形式をロードする。
-- execve() はアプリケーション(何の？)が呼ぶ。
+- execve() はアプリケーション(bashなど)が呼ぶ。
+
+- execve と exec はだいたい同じ、詳しくは man を読む
 
 リンカスクリプト
 ================
